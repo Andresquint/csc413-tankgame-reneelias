@@ -13,9 +13,31 @@ import java.util.HashMap;
 public class Tank extends GameObject {
 
     TankControls tankControls;
-    int speed;
+    int speed, currentBulletIndex;
     float rotationSpeed;
     Bullet[] bullets;
+
+    public Tank(Color tint, HashMap<String, TextureRegion> textureMap, int x, int y, int width, int height, boolean p1, int speed, float rotationSpeed)
+    {
+        super(tint, x, y, width, height);
+        if(p1)
+        {
+            textureRegion = textureMap.get("Tank1");
+        }
+        else
+        {
+            textureRegion = textureMap.get("Tank2");
+        }
+        tankControls = new TankControls(p1);
+        this.speed = speed;
+        this.rotationSpeed = rotationSpeed;
+        bullets = new Bullet[50];
+        for (int i = 0; i < bullets.length; i++)
+        {
+            bullets[i] = new Bullet(Color.WHITE, textureMap.get("Bullet"), 0, 0, 15, 5, 15, 0);
+        }
+        currentBulletIndex = 0;
+    }
 
     public Tank(Color tint, Texture texture, int x, int y, int width, int height, boolean p1, int speed, float rotationSpeed)
     {
@@ -23,11 +45,7 @@ public class Tank extends GameObject {
         tankControls = new TankControls(p1);
         this.speed = speed;
         this.rotationSpeed = rotationSpeed;
-        bullets = new Bullet[50];
-//        for (int i = 0; i < bullets.length; i++)
-//        {
-//            bullets[i]
-//        }
+        currentBulletIndex = 0;
     }
 
     public Tank(Color tint, TextureRegion textureRegion, int x, int y, int width, int height, boolean p1, int speed, float rotationSpeed)
@@ -40,11 +58,12 @@ public class Tank extends GameObject {
 
     public void Update(Input input, int screenWidth, int screenHeight)
     {
-        UpdateTankPosition(tankControls.UpdateInput(input), screenWidth, screenHeight);
-
+        HashMap<String, Boolean> pressedMap = tankControls.UpdateInput(input);
+        UpdateTankPosition(pressedMap, screenWidth, screenHeight);
+        ManageBullets(pressedMap, screenWidth, screenHeight);
     }
 
-    public void UpdateTankPosition(HashMap<String, Boolean> currentInput, int screenWidth, int screenHeight)
+    private void UpdateTankPosition(HashMap<String, Boolean> currentInput, int screenWidth, int screenHeight)
     {
         if(currentInput.get("Left"))
         {
@@ -78,11 +97,39 @@ public class Tank extends GameObject {
         }
     }
 
+    private void ManageBullets(HashMap<String, Boolean> pressedMap, int screenWidth, int screenHeight)
+    {
+        for(int i = 0; i < bullets.length; i++)
+        {
+            if(bullets[i].isActive())
+            {
+                bullets[i].Update(screenWidth, screenHeight);
+            }
+        }
+        if(pressedMap.get("Shoot"))
+        {
+            while(bullets[currentBulletIndex].isActive())
+            {
+                currentBulletIndex++;
+                if(currentBulletIndex == bullets.length)
+                {
+                    currentBulletIndex = 0;
+                }
+            }
+            bullets[currentBulletIndex].activate((int)x + width / 2, (int)y + height / 2, rotation);
+        }
 
-
+    }
 
     @Override
     public void Draw(SpriteBatch batch) {
+        for(int i = 0; i < bullets.length; i++)
+        {
+            if(bullets[i].isActive())
+            {
+                bullets[i].Draw(batch);
+            }
+        }
         super.Draw(batch);
     }
 }

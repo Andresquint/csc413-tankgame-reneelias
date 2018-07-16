@@ -19,6 +19,7 @@ public class TankControls {
             keysMap.put("Left", Input.Keys.LEFT);
             keysMap.put("Down", Input.Keys.DOWN);
             keysMap.put("Up", Input.Keys.UP);
+            keysMap.put("Shoot",Input.Keys.CONTROL_RIGHT);
         }
         else
         {
@@ -26,12 +27,15 @@ public class TankControls {
             keysMap.put("Left", Input.Keys.A);
             keysMap.put("Down", Input.Keys.S);
             keysMap.put("Up", Input.Keys.W);
+            keysMap.put("Shoot",Input.Keys.SPACE);
         }
+
         pressedMap = new HashMap<String, Boolean>();
         pressedMap.put("Right", false);
         pressedMap.put("Left", false);
         pressedMap.put("Down", false);
         pressedMap.put("Up", false);
+        pressedMap.put("Shoot", false);
     }
 
     public HashMap<String, Boolean> UpdateInput(Input input) {
@@ -39,6 +43,7 @@ public class TankControls {
         pressedMap.put("Left", false);
         pressedMap.put("Down", false);
         pressedMap.put("Up", false);
+        pressedMap.put("Shoot", false);
 
         if(input.isKeyPressed(keysMap.get("Right")))
         {
@@ -55,6 +60,10 @@ public class TankControls {
         if(input.isKeyPressed(keysMap.get("Up")))
         {
             pressedMap.put("Up", true);
+        }
+        if(input.isKeyJustPressed(keysMap.get("Shoot")))
+        {
+            pressedMap.put("Shoot", true);
         }
 
 

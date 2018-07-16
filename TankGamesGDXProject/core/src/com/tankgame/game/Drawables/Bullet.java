@@ -9,6 +9,7 @@ import com.tankgame.game.TankControls;
 
 public class Bullet extends GameObject {
     Vector2 velocity;
+    int speed;
     private boolean active;
 
     public boolean isActive() {
@@ -20,17 +21,18 @@ public class Bullet extends GameObject {
         active = true;
         this.x = x;
         this.y = y;
-        velocity.x = (float)(velocity.x * Math.cos(Math.toRadians(rotation)));
-        velocity.y = (float)(velocity.y * Math.cos(Math.toRadians(rotation)));
+        velocity.x = (float)(speed * Math.cos(Math.toRadians(rotation)));
+        velocity.y = (float)(speed * Math.sin(Math.toRadians(rotation)));
+        this.rotation = rotation;
     }
 
 
     public Bullet(Color tint, Texture texture, int x, int y, int width, int height, int speed, float rotation)
     {
         super(tint, texture, x, y, width, height);
+        this.speed = speed;
         velocity = new Vector2(speed, 0);
-        velocity.x = (float)(velocity.x * Math.cos(Math.toRadians(rotation)));
-        velocity.y = (float)(velocity.y * Math.cos(Math.toRadians(rotation)));
+        this.rotation = rotation;
         active = false;
 
     }
@@ -38,9 +40,9 @@ public class Bullet extends GameObject {
     public Bullet(Color tint, TextureRegion textureRegion, int x, int y, int width, int height, int speed, float rotation)
     {
         super(tint, textureRegion, x, y, width, height);
+        this.speed = speed;
         velocity = new Vector2(speed, 0);
-        velocity.x = (float)(velocity.x * Math.cos(Math.toRadians(rotation)));
-        velocity.y = (float)(velocity.y * Math.cos(Math.toRadians(rotation)));
+        this.rotation = rotation;
         active = false;
     }
 

@@ -25,6 +25,12 @@ public class GameObject extends Drawable {
         hitbox = new Rectangle(x, y, width, height);
     }
 
+    public GameObject(Color tint, int x, int y, int width, int height)
+    {
+        super(tint, x, y, width, height);
+        hitbox = new Rectangle(x, y, width, height);
+    }
+
     public boolean outOfBounds(int screenWidth, int screenHeight)
     {
         return (x + width > screenWidth || x < 0 || y + height > screenHeight || y < 0);

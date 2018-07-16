@@ -5,6 +5,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
+import java.util.HashMap;
+
 
 public class Drawable {
 
@@ -30,6 +32,16 @@ public class Drawable {
     {
         this.tint = tint;
         this.textureRegion = textureRegion;
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        rotation = 0;
+    }
+
+    public Drawable(Color tint, int x, int y, int width, int height)
+    {
+        this.tint = tint;
         this.x = x;
         this.y = y;
         this.width = width;
