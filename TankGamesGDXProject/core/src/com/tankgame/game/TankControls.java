@@ -13,7 +13,7 @@ public class TankControls {
     public TankControls(boolean p1)
     {
         keysMap = new HashMap<String, Integer>();
-        if(p1)
+        if(!p1)
         {
             keysMap.put("Right", Input.Keys.RIGHT);
             keysMap.put("Left", Input.Keys.LEFT);

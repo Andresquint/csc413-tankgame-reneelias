@@ -16,6 +16,11 @@ public class Tank extends GameObject {
     int speed, currentBulletIndex;
     float rotationSpeed;
     Bullet[] bullets;
+    int healthPoints;
+    public int GetHealth()
+    {
+        return healthPoints;
+    }
 
     public Tank(Color tint, HashMap<String, TextureRegion> textureMap, int x, int y, int width, int height, boolean p1, int speed, float rotationSpeed)
     {
@@ -37,6 +42,7 @@ public class Tank extends GameObject {
             bullets[i] = new Bullet(Color.WHITE, textureMap.get("Bullet"), 0, 0, 15, 5, 15, 0);
         }
         currentBulletIndex = 0;
+        healthPoints = 20;
     }
 
     public Tank(Color tint, Texture texture, int x, int y, int width, int height, boolean p1, int speed, float rotationSpeed)
@@ -56,14 +62,14 @@ public class Tank extends GameObject {
         this.rotationSpeed = rotationSpeed;
     }
 
-    public void Update(Input input, int screenWidth, int screenHeight)
+    public void Update(Input input, int screenWidth, int screenHeight, WallPiece[][] walls, Tank enemy)
     {
         HashMap<String, Boolean> pressedMap = tankControls.UpdateInput(input);
-        UpdateTankPosition(pressedMap, screenWidth, screenHeight);
-        ManageBullets(pressedMap, screenWidth, screenHeight);
+        UpdateTankPosition(pressedMap, screenWidth, screenHeight, walls, enemy);
+        ManageBullets(pressedMap, screenWidth, screenHeight, walls, enemy);
     }
 
-    private void UpdateTankPosition(HashMap<String, Boolean> currentInput, int screenWidth, int screenHeight)
+    private void UpdateTankPosition(HashMap<String, Boolean> currentInput, int screenWidth, int screenHeight, WallPiece[][] walls, Tank enemy)
     {
         if(currentInput.get("Left"))
         {
@@ -79,7 +85,7 @@ public class Tank extends GameObject {
         {
             x += currentXSpeed;
             y += currentYSpeed;
-            if(outOfBounds(screenWidth, screenHeight))
+            if(outOfBounds(screenWidth, screenHeight) || CheckWallCollision(walls) || getHitbox().overlaps(enemy.getHitbox()))
             {
                 x -= currentXSpeed;
                 y -= currentYSpeed;
@@ -89,7 +95,7 @@ public class Tank extends GameObject {
         {
             x -= currentXSpeed;
             y -= currentYSpeed;
-            if(outOfBounds(screenWidth, screenHeight))
+            if(outOfBounds(screenWidth, screenHeight) || CheckWallCollision(walls) || getHitbox().overlaps(enemy.getHitbox()))
             {
                 x += currentXSpeed;
                 y += currentYSpeed;
@@ -97,13 +103,13 @@ public class Tank extends GameObject {
         }
     }
 
-    private void ManageBullets(HashMap<String, Boolean> pressedMap, int screenWidth, int screenHeight)
+    private void ManageBullets(HashMap<String, Boolean> pressedMap, int screenWidth, int screenHeight, WallPiece[][] walls, Tank enemy)
     {
         for(int i = 0; i < bullets.length; i++)
         {
             if(bullets[i].isActive())
             {
-                bullets[i].Update(screenWidth, screenHeight);
+                bullets[i].Update(screenWidth, screenHeight, walls, enemy);
             }
         }
         if(pressedMap.get("Shoot"))
@@ -119,6 +125,26 @@ public class Tank extends GameObject {
             bullets[currentBulletIndex].activate((int)x + width / 2, (int)y + height / 2, rotation);
         }
 
+    }
+
+    private boolean CheckWallCollision(WallPiece[][] walls)
+    {
+        for(WallPiece[] wall : walls)
+        {
+            for(WallPiece w : wall)
+            {
+                if(getHitbox().overlaps(w.getHitbox()))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public void LoseHealth()
+    {
+        healthPoints--;
     }
 
     @Override

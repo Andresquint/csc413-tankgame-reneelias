@@ -46,14 +46,34 @@ public class Bullet extends GameObject {
         active = false;
     }
 
-    public void Update(int screenWidth, int screenHeight)
+    public void Update(int screenWidth, int screenHeight, WallPiece[][] walls, Tank enemy)
     {
         x += velocity.x;
         y += velocity.y;
-        if(outOfBounds(screenWidth, screenHeight))
+        boolean tankHit = getHitbox().overlaps(enemy.getHitbox());
+        if(outOfBounds(screenWidth, screenHeight) || CheckWallCollision(walls) || tankHit)
         {
             active = false;
+            if(tankHit)
+            {
+                enemy.LoseHealth();
+            }
         }
+    }
+
+    private boolean CheckWallCollision(WallPiece[][] walls)
+    {
+        for(WallPiece[] wall : walls)
+        {
+            for(WallPiece w : wall)
+            {
+                if(getHitbox().overlaps(w.getHitbox()))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override
