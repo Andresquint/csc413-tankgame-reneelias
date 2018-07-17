@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
+import com.tankgame.game.Drawables.DestructableWallPiece;
 import com.tankgame.game.Drawables.Drawable;
 import com.tankgame.game.Drawables.Tank;
 import com.tankgame.game.Drawables.WallPiece;
@@ -23,6 +24,7 @@ public class ScreenHandler extends ApplicationAdapter {
 	SpriteBatch cameraBatch, regularBatch, miniMapBatch;
 	Tank tank1, tank2;
 	ArrayList<Drawable> background;
+	Drawable centerDivider;
 	int screenWidth, screenHeight, mapWidth, mapHeight, miniMapWidth, miniMapHeight;
 	HashMap<String, TextureRegion> textureMap;
 	WallPiece[][] walls;
@@ -36,19 +38,20 @@ public class ScreenHandler extends ApplicationAdapter {
 		screenHeight = 720;
 		mapWidth = 1900;
 		mapHeight = 1450;
-		miniMapWidth = mapWidth / 11;
-		miniMapHeight = mapHeight / 11;
+		miniMapWidth = mapWidth / 14;
+		miniMapHeight = mapHeight / 14;
 		Gdx.graphics.setWindowedMode(screenWidth, screenHeight);
 		Gdx.graphics.setResizable(false);
 		cameraBatch =  new SpriteBatch();
 		regularBatch =  new SpriteBatch();
 		miniMapBatch = new SpriteBatch();
 		textureMap = new HashMap<String, TextureRegion>();
-		textureMap.put("Tank1", new TextureRegion(new Texture("Tank1.gif"), 7, 9, 53, 45));
-		textureMap.put("Tank2", new TextureRegion(new Texture("Tank2.gif"), 7, 9, 53, 45));
+		textureMap.put("Tank1", new TextureRegion(new Texture("Tank1_trans.gif"), 7, 9, 53, 45));
+		textureMap.put("Tank2", new TextureRegion(new Texture("Tank2_trans.gif"), 7, 9, 53, 45));
 		textureMap.put("Bullet", new TextureRegion(new Texture("Shell.gif"), 6, 8, 12, 8));
 		textureMap.put("Wall1", new TextureRegion(new Texture("Wall1.gif"), 0, 0, 32, 32));
 		textureMap.put("Wall2", new TextureRegion(new Texture("Wall2.gif"), 0, 0, 32, 32));
+		textureMap.put("WhitePixel", new TextureRegion(new Texture("WhitePixel.png"), 0, 0, 1, 1));
 		background = new ArrayList<Drawable>();
 		int backgroundX = -320,  backgroundY = -480;
 		while(true)
@@ -70,10 +73,12 @@ public class ScreenHandler extends ApplicationAdapter {
 		tank1 = new Tank(Color.WHITE, textureMap, explosion, mapWidth / 4 - 25, mapHeight - 50, 50, 50, true, 10, 5);
 		tank2 = new Tank(Color.WHITE, textureMap, explosion, mapWidth * 3 / 4 - 25, 0, 50, 50, false, 10, 5);
 
+		centerDivider = new Drawable(Color.BLACK, textureMap.get("WhitePixel"), screenWidth / 2 - 2, 0, 4, screenHeight);
+
 		cam1 = new OrthographicCamera(screenWidth / 2, screenHeight);
-		cam1.zoom = 1.25f;
+		cam1.zoom = 1.4f;
 		cam2 = new OrthographicCamera(screenWidth / 2, screenHeight);
-		cam2.zoom = 1.25f;
+		cam2.zoom = 1.4f;
 		miniCam = new OrthographicCamera(mapWidth + 100, mapHeight + 100);
 		miniCam.position.set(mapWidth / 2, mapHeight/ 2, 0);
 
@@ -87,12 +92,6 @@ public class ScreenHandler extends ApplicationAdapter {
 		tank1.Update(Gdx.input, mapWidth, mapHeight, walls, tank2, Gdx.graphics.getDeltaTime());
 		tank2.Update(Gdx.input, mapWidth, mapHeight, walls, tank1, Gdx.graphics.getDeltaTime());
 
-		cam1.position.set(tank1.getX() + tank1.getWidth() / 2, tank1.getY() + tank1.getHeight() / 2, 0);
-		cam1.update();
-		cam2.position.set(tank2.getX() + tank1.getWidth() / 2, tank2.getY() + tank1.getHeight() / 2, 0);
-		cam2.update();
-		miniCam.update();
-
 		draw();
 	}
 
@@ -102,6 +101,9 @@ public class ScreenHandler extends ApplicationAdapter {
 		Gdx.gl.glViewport(0, 0, screenWidth / 2, screenHeight);
 		Gdx.gl.glClearColor(1, 0, 0, 1);
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+		cam1.position.set(tank1.getX() + tank1.getWidth() / 2, tank1.getY() + tank1.getHeight() / 2, 0);
+		cam1.update();
 		cameraBatch.setProjectionMatrix(cam1.combined);
 		cameraBatch.begin();
 		for(Drawable back : background)
@@ -123,6 +125,9 @@ public class ScreenHandler extends ApplicationAdapter {
 		/**Right Screen Draw*/
 		Gdx.gl.glViewport(screenWidth / 2, 0, screenWidth / 2, screenHeight);
 		Gdx.gl.glClearColor(1, 0, 0, 1);
+
+		cam2.position.set(tank2.getX() + tank1.getWidth() / 2, tank2.getY() + tank1.getHeight() / 2, 0);
+		cam2.update();
 		cameraBatch.setProjectionMatrix(cam2.combined);
 		cameraBatch.begin();
 		for(Drawable back : background)
@@ -141,9 +146,22 @@ public class ScreenHandler extends ApplicationAdapter {
 
 		cameraBatch.end();
 
+		/**HUD Draw*/
+		Gdx.gl.glViewport(0, 0, screenWidth, screenHeight);
+		Gdx.gl.glClearColor(1, 0, 0, 1);
+		regularBatch.begin();
+
+		font.getData().setScale(1.75f);
+		font.draw(regularBatch, Integer.toString(tank1.getHealth()), 0, 20);
+		font.draw(regularBatch, Integer.toString(tank2.getHealth()), screenWidth - 30, 20);
+		centerDivider.Draw(regularBatch);
+		regularBatch.end();
+
 		/**Mini-Map Draw*/
 		Gdx.gl.glViewport(screenWidth / 2 - miniMapWidth / 2, 0, miniMapWidth, miniMapHeight);
 		Gdx.gl.glClearColor(1, 0, 0, 1);
+
+		miniCam.update();
 		miniMapBatch.setProjectionMatrix(miniCam.combined);
 		miniMapBatch.begin();
 		for(Drawable back : background)
@@ -161,14 +179,6 @@ public class ScreenHandler extends ApplicationAdapter {
 		}
 
 		miniMapBatch.end();
-
-		Gdx.gl.glViewport(0, 0, screenWidth, screenHeight);
-		Gdx.gl.glClearColor(1, 0, 0, 1);
-		regularBatch.begin();
-
-		font.draw(regularBatch, Integer.toString(tank1.getHealth()), 0, 20);
-		font.draw(regularBatch, Integer.toString(tank2.getHealth()), screenWidth - 20, 20);
-		regularBatch.end();
 	}
 
 	public void initialiazeWalls()
@@ -177,29 +187,29 @@ public class ScreenHandler extends ApplicationAdapter {
 		walls = new WallPiece[7][];
 
 		/**Center Divider*/
-		int startingY = mapHeight / 2 - 50 * 5;
+		int startingY = mapHeight / 2 - 50 * 6;
 		int startingX = mapWidth / 2 - 25;
-		walls[0] = new WallPiece[10];
+		walls[0] = new WallPiece[12];
 		for(int i = 0; i < walls[0].length; i++)
 		{
-			walls[0][i] = new WallPiece(Color.WHITE, textureMap.get("Wall1"), startingX, startingY + 50 * i, 50, 50);
+			walls[0][i] = new DestructableWallPiece(Color.WHITE, textureMap.get("Wall1"), startingX, startingY + 50 * i, 50, 50, textureMap.get("Wall2"), 2);
 		}
 
 		/**Quarter Divider Left*/
 		startingY = mapHeight / 2 - 25;
 		startingX = mapWidth / 4 - 100;
-		walls[1] = new WallPiece[4];
+		walls[1] = new DestructableWallPiece[4];
 		for(int i = 0; i < walls[1].length; i++)
 		{
-			walls[1][i] = new WallPiece(Color.WHITE, textureMap.get("Wall1"), startingX + 50 * i, startingY, 50, 50);
+			walls[1][i] = new DestructableWallPiece(Color.WHITE, textureMap.get("Wall1"), startingX + 50 * i, startingY, 50, 50, textureMap.get("Wall2"), 2);
 		}
 
 		/**Quarter Divider Right*/
 		startingX = (mapWidth / 4) * 3 - 100;
-		walls[2] = new WallPiece[4];
+		walls[2] = new DestructableWallPiece[4];
 		for(int i = 0; i < walls[2].length; i++)
 		{
-			walls[2][i] = new WallPiece(Color.WHITE, textureMap.get("Wall1"), startingX + 50 * i, startingY, 50, 50);
+			walls[2][i] = new DestructableWallPiece(Color.WHITE, textureMap.get("Wall1"), startingX + 50 * i, startingY, 50, 50, textureMap.get("Wall2"), 2);
 		}
 
 		/**Top Border*/

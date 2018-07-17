@@ -151,7 +151,10 @@ public class Tank extends GameObject {
             {
                 if(getHitbox().overlaps(w.getHitbox()))
                 {
-                    return true;
+                    if(!w.isDestructable() || (w.isDestructable() && ((DestructableWallPiece)w).getHealth() > 0))
+                    {
+                        return true;
+                    }
                 }
             }
         }

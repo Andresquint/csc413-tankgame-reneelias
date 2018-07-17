@@ -69,7 +69,15 @@ public class Bullet extends GameObject {
             {
                 if(getHitbox().overlaps(w.getHitbox()))
                 {
-                    return true;
+                    if((w.isDestructable() && ((DestructableWallPiece)w).getHealth() > 0))
+                    {
+                        ((DestructableWallPiece)w).damageWall();
+                        return true;
+                    }
+                    else if(!w.isDestructable())
+                    {
+                        return true;
+                    }
                 }
             }
         }
