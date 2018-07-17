@@ -10,12 +10,38 @@ import java.util.HashMap;
 
 public class Drawable {
 
-    Color tint;
     Texture texture;
     TextureRegion textureRegion;
-    float x, y;
-    int width, height;
+
+    Color tint;
+    public Color getTint() {
+        return tint;
+    }
+
+    float x;
+    public float getX() {
+        return x;
+    }
+
+    float y;
+    public float getY() {
+        return y;
+    }
+
+    int width;
+    public int getWidth() {
+        return width;
+    }
+
+    int height;
+    public int getHeight() {
+        return height;
+    }
+
     float rotation;
+    public float getRotation() {
+        return rotation;
+    }
 
     public Drawable(Color tint, Texture texture, int x, int y, int width, int height)
     {

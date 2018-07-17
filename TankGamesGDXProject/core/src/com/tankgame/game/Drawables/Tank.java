@@ -3,6 +3,7 @@ package com.tankgame.game.Drawables;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.tankgame.game.TankControls;
@@ -17,21 +18,27 @@ public class Tank extends GameObject {
     float rotationSpeed;
     Bullet[] bullets;
     int healthPoints;
-    public int GetHealth()
+    public int getHealth()
     {
         return healthPoints;
     }
+    Animation<TextureRegion> explosionAnimation;
+    float explosionTimer;
+    boolean p1;
 
-    public Tank(Color tint, HashMap<String, TextureRegion> textureMap, int x, int y, int width, int height, boolean p1, int speed, float rotationSpeed)
+    public Tank(Color tint, HashMap<String, TextureRegion> textureMap, Animation<TextureRegion> explosionAnimation, int x, int y, int width, int height, boolean p1, int speed, float rotationSpeed)
     {
         super(tint, x, y, width, height);
+        this.p1 = p1;
         if(p1)
         {
             textureRegion = textureMap.get("Tank1");
+            rotation = 270;
         }
         else
         {
             textureRegion = textureMap.get("Tank2");
+            rotation = 90;
         }
         tankControls = new TankControls(p1);
         this.speed = speed;
@@ -39,10 +46,11 @@ public class Tank extends GameObject {
         bullets = new Bullet[50];
         for (int i = 0; i < bullets.length; i++)
         {
-            bullets[i] = new Bullet(Color.WHITE, textureMap.get("Bullet"), 0, 0, 15, 5, 15, 0);
+            bullets[i] = new Bullet(Color.WHITE, textureMap.get("Bullet"), 0, 0, 20, 7,15, 0);
         }
         currentBulletIndex = 0;
-        healthPoints = 20;
+        healthPoints = 10;
+        this.explosionAnimation = explosionAnimation;
     }
 
     public Tank(Color tint, Texture texture, int x, int y, int width, int height, boolean p1, int speed, float rotationSpeed)
@@ -62,10 +70,18 @@ public class Tank extends GameObject {
         this.rotationSpeed = rotationSpeed;
     }
 
-    public void Update(Input input, int screenWidth, int screenHeight, WallPiece[][] walls, Tank enemy)
+    public void Update(Input input, int screenWidth, int screenHeight, WallPiece[][] walls, Tank enemy, float deltaTime)
     {
         HashMap<String, Boolean> pressedMap = tankControls.UpdateInput(input);
-        UpdateTankPosition(pressedMap, screenWidth, screenHeight, walls, enemy);
+        if(healthPoints > 0)
+        {
+            UpdateTankPosition(pressedMap, screenWidth, screenHeight, walls, enemy);
+        }
+        else
+        {
+            explosionTimer += deltaTime;
+            textureRegion = explosionAnimation.getKeyFrame(explosionTimer);
+        }
         ManageBullets(pressedMap, screenWidth, screenHeight, walls, enemy);
     }
 
@@ -85,7 +101,7 @@ public class Tank extends GameObject {
         {
             x += currentXSpeed;
             y += currentYSpeed;
-            if(outOfBounds(screenWidth, screenHeight) || CheckWallCollision(walls) || getHitbox().overlaps(enemy.getHitbox()))
+            if(outOfBounds(screenWidth, screenHeight) || CheckWallCollision(walls) || (getHitbox().overlaps(enemy.getHitbox()) && enemy.getHealth() > 0))
             {
                 x -= currentXSpeed;
                 y -= currentYSpeed;
@@ -95,7 +111,7 @@ public class Tank extends GameObject {
         {
             x -= currentXSpeed;
             y -= currentYSpeed;
-            if(outOfBounds(screenWidth, screenHeight) || CheckWallCollision(walls) || getHitbox().overlaps(enemy.getHitbox()))
+            if(outOfBounds(screenWidth, screenHeight) || CheckWallCollision(walls) || (getHitbox().overlaps(enemy.getHitbox()) && enemy.getHealth() > 0))
             {
                 x += currentXSpeed;
                 y += currentYSpeed;
@@ -112,7 +128,7 @@ public class Tank extends GameObject {
                 bullets[i].Update(screenWidth, screenHeight, walls, enemy);
             }
         }
-        if(pressedMap.get("Shoot"))
+        if(pressedMap.get("Shoot") && healthPoints > 0)
         {
             while(bullets[currentBulletIndex].isActive())
             {
@@ -156,6 +172,28 @@ public class Tank extends GameObject {
                 bullets[i].Draw(batch);
             }
         }
-        super.Draw(batch);
+        if(healthPoints > 0 || !explosionAnimation.isAnimationFinished(explosionTimer))
+        {
+            super.Draw(batch);
+        }
+    }
+
+    public void MiniDraw(SpriteBatch batch)
+    {
+        if(p1)
+        {
+            tint = Color.RED;
+        }
+        else
+        {
+            tint = Color.BLUE;
+        }
+        float multiplier = 1.75f;
+        width *= multiplier;
+        height *= multiplier;
+        Draw(batch);
+        tint = Color.WHITE;
+        width /= multiplier;
+        height /= multiplier;
     }
 }

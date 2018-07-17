@@ -50,7 +50,7 @@ public class Bullet extends GameObject {
     {
         x += velocity.x;
         y += velocity.y;
-        boolean tankHit = getHitbox().overlaps(enemy.getHitbox());
+        boolean tankHit = getHitbox().overlaps(enemy.getHitbox()) && enemy.getHealth() > 0;
         if(outOfBounds(screenWidth, screenHeight) || CheckWallCollision(walls) || tankHit)
         {
             active = false;
