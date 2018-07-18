@@ -52,6 +52,8 @@ public class ScreenHandler extends ApplicationAdapter {
 		textureMap.put("Wall1", new TextureRegion(new Texture("Wall1.gif"), 0, 0, 32, 32));
 		textureMap.put("Wall2", new TextureRegion(new Texture("Wall2.gif"), 0, 0, 32, 32));
 		textureMap.put("WhitePixel", new TextureRegion(new Texture("WhitePixel.png"), 0, 0, 1, 1));
+		textureMap.put("HealthBarEmpty", new TextureRegion(new Texture("HealthBarEmpty.png"), 0, 0, 301, 50));
+		textureMap.put("HealthBarFiller", new TextureRegion(new Texture("HealthBarFiller.png"), 0, 0, 301, 50));
 		background = new ArrayList<Drawable>();
 		int backgroundX = -320,  backgroundY = -480;
 		while(true)
@@ -70,8 +72,8 @@ public class ScreenHandler extends ApplicationAdapter {
 		}
 		explosion = GifDecoder.loadGIFAnimation(Animation.PlayMode.NORMAL, Gdx.files.internal("Explosion_large_trans.gif").read());
 		explosion.setFrameDuration(.045f);
-		tank1 = new Tank(Color.WHITE, textureMap, explosion, mapWidth / 4 - 25, mapHeight - 50, 50, 50, true, 10, 5);
-		tank2 = new Tank(Color.WHITE, textureMap, explosion, mapWidth * 3 / 4 - 25, 0, 50, 50, false, 10, 5);
+		tank1 = new Tank(Color.WHITE, textureMap, explosion, mapWidth / 4 - 25, mapHeight - 50, 50, 50, true, 10, 5, 20);
+		tank2 = new Tank(Color.WHITE, textureMap, explosion, mapWidth * 3 / 4 - 25, 0, 50, 50, false, 10, 5, 20);
 
 		centerDivider = new Drawable(Color.BLACK, textureMap.get("WhitePixel"), screenWidth / 2 - 2, 0, 4, screenHeight);
 
@@ -151,9 +153,11 @@ public class ScreenHandler extends ApplicationAdapter {
 		Gdx.gl.glClearColor(1, 0, 0, 1);
 		regularBatch.begin();
 
-		font.getData().setScale(1.75f);
-		font.draw(regularBatch, Integer.toString(tank1.getHealth()), 0, 20);
-		font.draw(regularBatch, Integer.toString(tank2.getHealth()), screenWidth - 30, 20);
+//		font.getData().setScale(1.75f);
+//		font.draw(regularBatch, Integer.toString(tank1.getHealth()), 0, 20);
+//		font.draw(regularBatch, Integer.toString(tank2.getHealth()), screenWidth - 30, 20);
+		tank1.DrawHealth(regularBatch, screenWidth, screenHeight);
+		tank2.DrawHealth(regularBatch, screenWidth, screenHeight);
 		centerDivider.Draw(regularBatch);
 		regularBatch.end();
 

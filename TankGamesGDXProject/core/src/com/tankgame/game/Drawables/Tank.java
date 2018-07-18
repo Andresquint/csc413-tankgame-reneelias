@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.sun.prism.shader.Texture_LinearGradient_REFLECT_Loader;
 import com.tankgame.game.TankControls;
 
 import java.util.ArrayList;
@@ -14,7 +15,7 @@ import java.util.HashMap;
 public class Tank extends GameObject {
 
     TankControls tankControls;
-    int speed, currentBulletIndex;
+    int speed, currentBulletIndex, fullHealth;
     float rotationSpeed;
     Bullet[] bullets;
     int healthPoints;
@@ -23,10 +24,11 @@ public class Tank extends GameObject {
         return healthPoints;
     }
     Animation<TextureRegion> explosionAnimation;
-    float explosionTimer;
+    float explosionTimer, bulletTimer;
     boolean p1;
+    TextureRegion healthBarEmptyTexture, healthBarFillerTexture;
 
-    public Tank(Color tint, HashMap<String, TextureRegion> textureMap, Animation<TextureRegion> explosionAnimation, int x, int y, int width, int height, boolean p1, int speed, float rotationSpeed)
+    public Tank(Color tint, HashMap<String, TextureRegion> textureMap, Animation<TextureRegion> explosionAnimation, int x, int y, int width, int height, boolean p1, int speed, float rotationSpeed, int fullHealth)
     {
         super(tint, x, y, width, height);
         this.p1 = p1;
@@ -49,8 +51,12 @@ public class Tank extends GameObject {
             bullets[i] = new Bullet(Color.WHITE, textureMap.get("Bullet"), 0, 0, 20, 7,15, 0);
         }
         currentBulletIndex = 0;
-        healthPoints = 10;
+        healthPoints = fullHealth;
         this.explosionAnimation = explosionAnimation;
+        bulletTimer = 0;
+        healthBarEmptyTexture = textureMap.get("HealthBarEmpty");
+        healthBarFillerTexture = textureMap.get("HealthBarFiller");
+        this.fullHealth = fullHealth;
     }
 
     public Tank(Color tint, Texture texture, int x, int y, int width, int height, boolean p1, int speed, float rotationSpeed)
@@ -82,6 +88,8 @@ public class Tank extends GameObject {
             explosionTimer += deltaTime;
             textureRegion = explosionAnimation.getKeyFrame(explosionTimer);
         }
+
+        bulletTimer += deltaTime;
         ManageBullets(pressedMap, screenWidth, screenHeight, walls, enemy);
     }
 
@@ -128,7 +136,7 @@ public class Tank extends GameObject {
                 bullets[i].Update(screenWidth, screenHeight, walls, enemy);
             }
         }
-        if(pressedMap.get("Shoot") && healthPoints > 0)
+        if(pressedMap.get("Shoot") && healthPoints > 0 && bulletTimer >= .2f)
         {
             while(bullets[currentBulletIndex].isActive())
             {
@@ -139,6 +147,7 @@ public class Tank extends GameObject {
                 }
             }
             bullets[currentBulletIndex].activate((int)x + width / 2, (int)y + height / 2, rotation);
+            bulletTimer = 0;
         }
 
     }
@@ -198,5 +207,48 @@ public class Tank extends GameObject {
         tint = Color.WHITE;
         width /= multiplier;
         height /= multiplier;
+    }
+
+    public void DrawHealth(SpriteBatch batch, int screenWidth, int screenHeight)
+    {
+        float currentHealthPercentage = (float)healthPoints / fullHealth;
+        int healthBarWidth = 100, healthBarHeight = 15;
+        if(p1)
+        {
+            if(currentHealthPercentage > .5f)
+            {
+                batch.setColor(Color.GREEN);
+            }
+            else if(currentHealthPercentage > .25f)
+            {
+                batch.setColor(Color.YELLOW);
+            }
+            else
+            {
+                batch.setColor(Color.RED);
+            }
+            batch.draw(healthBarFillerTexture, 10, screenHeight - healthBarHeight - 15, healthBarWidth * currentHealthPercentage, healthBarHeight);
+            batch.setColor(Color.WHITE);
+            batch.draw(healthBarEmptyTexture, 10, screenHeight - healthBarHeight - 15, healthBarWidth, healthBarHeight);
+        }
+        else
+        {
+            if(currentHealthPercentage > .5f)
+            {
+                batch.setColor(Color.GREEN);
+            }
+            else if(currentHealthPercentage > .25f)
+            {
+                batch.setColor(Color.YELLOW);
+            }
+            else
+            {
+                batch.setColor(Color.RED);
+            }
+            batch.draw(healthBarFillerTexture, screenWidth - healthBarWidth - 10, screenHeight - healthBarHeight - 15, healthBarWidth * currentHealthPercentage, healthBarHeight);
+            batch.setColor(Color.WHITE);
+            batch.draw(healthBarEmptyTexture, screenWidth - healthBarWidth - 10, screenHeight - healthBarHeight - 15, healthBarWidth, healthBarHeight);
+
+        }
     }
 }

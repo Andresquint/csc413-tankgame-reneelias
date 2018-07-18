@@ -26,7 +26,6 @@ public class Bullet extends GameObject {
         this.rotation = rotation;
     }
 
-
     public Bullet(Color tint, Texture texture, int x, int y, int width, int height, int speed, float rotation)
     {
         super(tint, texture, x, y, width, height);

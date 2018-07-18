@@ -61,7 +61,7 @@ public class TankControls {
         {
             pressedMap.put("Up", true);
         }
-        if(input.isKeyJustPressed(keysMap.get("Shoot")))
+        if(input.isKeyPressed(keysMap.get("Shoot")))
         {
             pressedMap.put("Shoot", true);
         }
