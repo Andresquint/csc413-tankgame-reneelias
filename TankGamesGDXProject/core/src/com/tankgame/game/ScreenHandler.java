@@ -11,10 +11,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector3;
-import com.tankgame.game.Drawables.DestructableWallPiece;
-import com.tankgame.game.Drawables.Drawable;
-import com.tankgame.game.Drawables.Tank;
-import com.tankgame.game.Drawables.WallPiece;
+import com.tankgame.game.Drawables.*;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -31,6 +28,7 @@ public class ScreenHandler extends ApplicationAdapter {
 	BitmapFont font;
 	Animation<TextureRegion> explosion;
 	OrthographicCamera cam1, cam2, miniCam;
+	Powerup rocketPowerup;
 	
 	@Override
 	public void create () {
@@ -54,6 +52,8 @@ public class ScreenHandler extends ApplicationAdapter {
 		textureMap.put("WhitePixel", new TextureRegion(new Texture("WhitePixel.png"), 0, 0, 1, 1));
 		textureMap.put("HealthBarEmpty", new TextureRegion(new Texture("HealthBarEmpty.png"), 0, 0, 301, 50));
 		textureMap.put("HealthBarFiller", new TextureRegion(new Texture("HealthBarFiller.png"), 0, 0, 301, 50));
+		textureMap.put("RocketPickup", new TextureRegion(new Texture("RocketPickup.png"), 0, 0, 32, 32));
+		textureMap.put("Rocket", new TextureRegion(new Texture("Rocket.png"), 0, 0, 21, 12));
 		background = new ArrayList<Drawable>();
 		int backgroundX = -320,  backgroundY = -480;
 		while(true)
@@ -72,8 +72,11 @@ public class ScreenHandler extends ApplicationAdapter {
 		}
 		explosion = GifDecoder.loadGIFAnimation(Animation.PlayMode.NORMAL, Gdx.files.internal("Explosion_large_trans.gif").read());
 		explosion.setFrameDuration(.045f);
-		tank1 = new Tank(Color.WHITE, textureMap, explosion, mapWidth / 4 - 25, mapHeight - 50, 50, 50, true, 10, 5, 20);
-		tank2 = new Tank(Color.WHITE, textureMap, explosion, mapWidth * 3 / 4 - 25, 0, 50, 50, false, 10, 5, 20);
+		tank1 = new Tank(Color.WHITE, textureMap, explosion, mapWidth / 4 - 25, mapHeight - 50, 50, 50, true, 10, 5, 20, 3);
+		tank2 = new Tank(Color.WHITE, textureMap, explosion, mapWidth * 3 / 4 - 25, 0, 50, 50, false, 10, 5, 10, 3);
+		rocketPowerup = new Powerup(Color.WHITE, textureMap.get("RocketPickup"), (int)(mapWidth / 2 - (tank1.getWidth() * .85f) / 2), 200, (int)(tank1.getWidth() * .85f), (int)(tank1.getWidth() * .85f));
+
+
 
 		centerDivider = new Drawable(Color.BLACK, textureMap.get("WhitePixel"), screenWidth / 2 - 2, 0, 4, screenHeight);
 
@@ -91,8 +94,9 @@ public class ScreenHandler extends ApplicationAdapter {
 
 	@Override
 	public void render () {
-		tank1.Update(Gdx.input, mapWidth, mapHeight, walls, tank2, Gdx.graphics.getDeltaTime());
-		tank2.Update(Gdx.input, mapWidth, mapHeight, walls, tank1, Gdx.graphics.getDeltaTime());
+		rocketPowerup.Update(Gdx.graphics.getDeltaTime(), false);
+		tank1.Update(Gdx.input, mapWidth, mapHeight, walls, tank2, Gdx.graphics.getDeltaTime(), rocketPowerup);
+		tank2.Update(Gdx.input, mapWidth, mapHeight, walls, tank1, Gdx.graphics.getDeltaTime(), rocketPowerup);
 
 		draw();
 	}
@@ -112,6 +116,7 @@ public class ScreenHandler extends ApplicationAdapter {
 		{
 			back.Draw(cameraBatch);
 		}
+		rocketPowerup.Draw(cameraBatch);
 		tank1.Draw(cameraBatch);
 		tank2.Draw(cameraBatch);
 		for(WallPiece[] wall: walls)
@@ -136,6 +141,7 @@ public class ScreenHandler extends ApplicationAdapter {
 		{
 			back.Draw(cameraBatch);
 		}
+		rocketPowerup.Draw(cameraBatch);
 		tank1.Draw(cameraBatch);
 		tank2.Draw(cameraBatch);
 		for(WallPiece[] wall: walls)
@@ -156,8 +162,8 @@ public class ScreenHandler extends ApplicationAdapter {
 //		font.getData().setScale(1.75f);
 //		font.draw(regularBatch, Integer.toString(tank1.getHealth()), 0, 20);
 //		font.draw(regularBatch, Integer.toString(tank2.getHealth()), screenWidth - 30, 20);
-		tank1.DrawHealth(regularBatch, screenWidth, screenHeight);
-		tank2.DrawHealth(regularBatch, screenWidth, screenHeight);
+		tank1.DrawHUD(regularBatch, screenWidth, screenHeight);
+		tank2.DrawHUD(regularBatch, screenWidth, screenHeight);
 		centerDivider.Draw(regularBatch);
 		regularBatch.end();
 
@@ -172,6 +178,7 @@ public class ScreenHandler extends ApplicationAdapter {
 		{
 			back.Draw(miniMapBatch);
 		}
+		rocketPowerup.Draw(miniMapBatch);
 		tank1.MiniDraw(miniMapBatch);
 		tank2.MiniDraw(miniMapBatch);
 		for(WallPiece[] wall: walls)

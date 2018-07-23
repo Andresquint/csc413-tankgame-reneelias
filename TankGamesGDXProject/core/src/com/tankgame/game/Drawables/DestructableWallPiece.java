@@ -15,9 +15,10 @@ public class DestructableWallPiece extends WallPiece {
         return healthPoints;
     }
 
-    public void damageWall()
+    public void damageWall(int damagePoints)
     {
-        if(--healthPoints <= fullHealth / 2 && textureRegion != brokenTexture) {
+        healthPoints -= damagePoints;
+        if(healthPoints <= fullHealth / 2 && textureRegion != brokenTexture) {
             textureRegion = brokenTexture;
         }
     }

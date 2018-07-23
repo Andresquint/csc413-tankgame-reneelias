@@ -11,6 +11,7 @@ public class Bullet extends GameObject {
     Vector2 velocity;
     int speed;
     private boolean active;
+    int damagePoints;
 
     public boolean isActive() {
         return active;
@@ -33,7 +34,7 @@ public class Bullet extends GameObject {
         velocity = new Vector2(speed, 0);
         this.rotation = rotation;
         active = false;
-
+        damagePoints = 1;
     }
 
     public Bullet(Color tint, TextureRegion textureRegion, int x, int y, int width, int height, int speed, float rotation)
@@ -43,19 +44,20 @@ public class Bullet extends GameObject {
         velocity = new Vector2(speed, 0);
         this.rotation = rotation;
         active = false;
+        damagePoints = 1;
     }
 
     public void Update(int screenWidth, int screenHeight, WallPiece[][] walls, Tank enemy)
     {
         x += velocity.x;
         y += velocity.y;
-        boolean tankHit = getHitbox().overlaps(enemy.getHitbox()) && enemy.getHealth() > 0;
+        boolean tankHit = getHitbox().overlaps(enemy.getHitbox()) && enemy.getLives() > 0;
         if(outOfBounds(screenWidth, screenHeight) || CheckWallCollision(walls) || tankHit)
         {
             active = false;
             if(tankHit)
             {
-                enemy.LoseHealth();
+                enemy.LoseHealth(damagePoints);
             }
         }
     }
@@ -70,7 +72,7 @@ public class Bullet extends GameObject {
                 {
                     if((w.isDestructable() && ((DestructableWallPiece)w).getHealth() > 0))
                     {
-                        ((DestructableWallPiece)w).damageWall();
+                        ((DestructableWallPiece)w).damageWall(damagePoints);
                         return true;
                     }
                     else if(!w.isDestructable())

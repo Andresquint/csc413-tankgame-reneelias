@@ -11,7 +11,10 @@ import java.util.HashMap;
 public class Drawable {
 
     Texture texture;
+    public Texture getTexture(){ return texture; }
+
     TextureRegion textureRegion;
+    public TextureRegion getTextureRegion(){ return textureRegion; }
 
     Color tint;
     public Color getTint() {
@@ -43,6 +46,20 @@ public class Drawable {
         return rotation;
     }
 
+    float scaleX;
+    public float getScaleX(){return scaleX;}
+    public void setScaleX(float scaleX)
+    {
+        this.scaleX = scaleX;
+    }
+
+    float scaleY;
+    public float getScaleY(){return scaleY;}
+    public void setScaleY(float scaleY)
+    {
+        this.scaleY = scaleY;
+    }
+
     public Drawable(Color tint, Texture texture, int x, int y, int width, int height)
     {
         this.tint = tint;
@@ -52,6 +69,8 @@ public class Drawable {
         this.width = width;
         this.height = height;
         rotation = 0;
+        scaleX = 1f;
+        scaleY = 1f;
     }
 
     public Drawable(Color tint, TextureRegion textureRegion, int x, int y, int width, int height)
@@ -63,6 +82,8 @@ public class Drawable {
         this.width = width;
         this.height = height;
         rotation = 0;
+        scaleX = 1f;
+        scaleY = 1f;
     }
 
     public Drawable(Color tint, int x, int y, int width, int height)
@@ -73,6 +94,8 @@ public class Drawable {
         this.width = width;
         this.height = height;
         rotation = 0;
+        scaleX = 1f;
+        scaleY = 1f;
     }
 
     public void Draw(SpriteBatch batch)
@@ -80,11 +103,11 @@ public class Drawable {
         batch.setColor(tint);
         if(texture != null)
         {
-            batch.draw(new TextureRegion(texture), x, y, width/2, height/2, width, height, 1, 1, rotation);
+            batch.draw(new TextureRegion(texture), x, y, width/2, height/2, width, height, scaleX, scaleY, rotation);
         }
         else
         {
-            batch.draw(textureRegion, x, y,  width/2, height/2, width, height, 1, 1, rotation);
+            batch.draw(textureRegion, x, y,  width/2, height/2, width, height, scaleX, scaleY, rotation);
         }
     }
 

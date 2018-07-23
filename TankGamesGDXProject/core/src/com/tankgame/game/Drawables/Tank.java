@@ -4,8 +4,10 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Interpolation;
 import com.sun.prism.shader.Texture_LinearGradient_REFLECT_Loader;
 import com.tankgame.game.TankControls;
 
@@ -15,9 +17,11 @@ import java.util.HashMap;
 public class Tank extends GameObject {
 
     TankControls tankControls;
-    int speed, currentBulletIndex, fullHealth;
+    int speed, currentBulletIndex, fullHealth, lives;
+    public int getLives(){return lives;}
     float rotationSpeed;
     Bullet[] bullets;
+    Bullet[] standardBullets, rockets;
     int healthPoints;
     public int getHealth()
     {
@@ -27,8 +31,10 @@ public class Tank extends GameObject {
     float explosionTimer, bulletTimer;
     boolean p1;
     TextureRegion healthBarEmptyTexture, healthBarFillerTexture;
+    boolean currentlyPoweredUp;
+    BitmapFont font;
 
-    public Tank(Color tint, HashMap<String, TextureRegion> textureMap, Animation<TextureRegion> explosionAnimation, int x, int y, int width, int height, boolean p1, int speed, float rotationSpeed, int fullHealth)
+    public Tank(Color tint, HashMap<String, TextureRegion> textureMap, Animation<TextureRegion> explosionAnimation, int x, int y, int width, int height, boolean p1, int speed, float rotationSpeed, int fullHealth, int lives)
     {
         super(tint, x, y, width, height);
         this.p1 = p1;
@@ -45,10 +51,16 @@ public class Tank extends GameObject {
         tankControls = new TankControls(p1);
         this.speed = speed;
         this.rotationSpeed = rotationSpeed;
-        bullets = new Bullet[50];
-        for (int i = 0; i < bullets.length; i++)
+        standardBullets = new Bullet[50];
+        for (int i = 0; i < standardBullets.length; i++)
         {
-            bullets[i] = new Bullet(Color.WHITE, textureMap.get("Bullet"), 0, 0, 20, 7,15, 0);
+            standardBullets[i] = new Bullet(Color.WHITE, textureMap.get("Bullet"), 0, 0, 20, 7,15, 0);
+        }
+        bullets = standardBullets;
+        rockets = new Rocket[5];
+        for(int i = 0; i < rockets.length; i++)
+        {
+            rockets[i] = new Rocket(Color.WHITE, textureMap.get("Rocket"), 0, 0, 30, 11, 15, 0);
         }
         currentBulletIndex = 0;
         healthPoints = fullHealth;
@@ -57,6 +69,9 @@ public class Tank extends GameObject {
         healthBarEmptyTexture = textureMap.get("HealthBarEmpty");
         healthBarFillerTexture = textureMap.get("HealthBarFiller");
         this.fullHealth = fullHealth;
+        this.lives = lives;
+        currentlyPoweredUp = false;
+        font = new BitmapFont();
     }
 
     public Tank(Color tint, Texture texture, int x, int y, int width, int height, boolean p1, int speed, float rotationSpeed)
@@ -76,10 +91,10 @@ public class Tank extends GameObject {
         this.rotationSpeed = rotationSpeed;
     }
 
-    public void Update(Input input, int screenWidth, int screenHeight, WallPiece[][] walls, Tank enemy, float deltaTime)
+    public void Update(Input input, int screenWidth, int screenHeight, WallPiece[][] walls, Tank enemy, float deltaTime, Powerup powerup)
     {
         HashMap<String, Boolean> pressedMap = tankControls.UpdateInput(input);
-        if(healthPoints > 0)
+        if(healthPoints > 0 && lives > 0)
         {
             UpdateTankPosition(pressedMap, screenWidth, screenHeight, walls, enemy);
         }
@@ -91,6 +106,14 @@ public class Tank extends GameObject {
 
         bulletTimer += deltaTime;
         ManageBullets(pressedMap, screenWidth, screenHeight, walls, enemy);
+
+        if(powerup.getActive() && powerup.getHitbox().overlaps(getHitbox()))
+        {
+            bullets = rockets;
+            currentBulletIndex = 0;
+            currentlyPoweredUp = true;
+            powerup.deactivate();
+        }
     }
 
     private void UpdateTankPosition(HashMap<String, Boolean> currentInput, int screenWidth, int screenHeight, WallPiece[][] walls, Tank enemy)
@@ -109,7 +132,7 @@ public class Tank extends GameObject {
         {
             x += currentXSpeed;
             y += currentYSpeed;
-            if(outOfBounds(screenWidth, screenHeight) || CheckWallCollision(walls) || (getHitbox().overlaps(enemy.getHitbox()) && enemy.getHealth() > 0))
+            if(outOfBounds(screenWidth, screenHeight) || CheckWallCollision(walls) || (getHitbox().overlaps(enemy.getHitbox()) && enemy.getLives() > 0))
             {
                 x -= currentXSpeed;
                 y -= currentYSpeed;
@@ -119,7 +142,7 @@ public class Tank extends GameObject {
         {
             x -= currentXSpeed;
             y -= currentYSpeed;
-            if(outOfBounds(screenWidth, screenHeight) || CheckWallCollision(walls) || (getHitbox().overlaps(enemy.getHitbox()) && enemy.getHealth() > 0))
+            if(outOfBounds(screenWidth, screenHeight) || CheckWallCollision(walls) || (getHitbox().overlaps(enemy.getHitbox()) && enemy.getLives() > 0))
             {
                 x += currentXSpeed;
                 y += currentYSpeed;
@@ -131,23 +154,42 @@ public class Tank extends GameObject {
     {
         for(int i = 0; i < bullets.length; i++)
         {
-            if(bullets[i].isActive())
+            if(standardBullets[i].isActive())
             {
-                bullets[i].Update(screenWidth, screenHeight, walls, enemy);
+                standardBullets[i].Update(screenWidth, screenHeight, walls, enemy);
+            }
+            if(i < rockets.length && rockets[i].isActive())
+            {
+                rockets[i].Update(screenWidth, screenHeight, walls, enemy);
             }
         }
-        if(pressedMap.get("Shoot") && healthPoints > 0 && bulletTimer >= .2f)
+        if(currentlyPoweredUp)
         {
+            bullets = rockets;
+        }
+        if(pressedMap.get("Shoot") && lives > 0 && bulletTimer >= .2f)
+        {
+            if(currentBulletIndex >= bullets.length)
+            {
+                currentBulletIndex = bullets.length - 1;
+            }
             while(bullets[currentBulletIndex].isActive())
             {
                 currentBulletIndex++;
                 if(currentBulletIndex == bullets.length)
                 {
                     currentBulletIndex = 0;
+                    if(currentlyPoweredUp)
+                    {
+                        bullets = standardBullets;
+                        currentBulletIndex = 0;
+                        currentlyPoweredUp = false;
+                    }
                 }
             }
             bullets[currentBulletIndex].activate((int)x + width / 2, (int)y + height / 2, rotation);
             bulletTimer = 0;
+            currentBulletIndex++;
         }
 
     }
@@ -170,9 +212,23 @@ public class Tank extends GameObject {
         return false;
     }
 
-    public void LoseHealth()
+    public void LoseHealth(int damagePoints)
     {
-        healthPoints--;
+        healthPoints -= damagePoints;
+
+        if(healthPoints <= 0)
+        {
+            lives--;
+            currentlyPoweredUp = false;
+            if(lives > 0)
+            {
+                healthPoints = fullHealth;
+            }
+            else
+            {
+                healthPoints = 0;
+            }
+        }
     }
 
     @Override
@@ -184,7 +240,7 @@ public class Tank extends GameObject {
                 bullets[i].Draw(batch);
             }
         }
-        if(healthPoints > 0 || !explosionAnimation.isAnimationFinished(explosionTimer))
+        if(lives > 0 || !explosionAnimation.isAnimationFinished(explosionTimer))
         {
             super.Draw(batch);
         }
@@ -209,7 +265,7 @@ public class Tank extends GameObject {
         height /= multiplier;
     }
 
-    public void DrawHealth(SpriteBatch batch, int screenWidth, int screenHeight)
+    public void DrawHUD(SpriteBatch batch, int screenWidth, int screenHeight)
     {
         float currentHealthPercentage = (float)healthPoints / fullHealth;
         int healthBarWidth = 100, healthBarHeight = 15;
@@ -230,6 +286,17 @@ public class Tank extends GameObject {
             batch.draw(healthBarFillerTexture, 10, screenHeight - healthBarHeight - 15, healthBarWidth * currentHealthPercentage, healthBarHeight);
             batch.setColor(Color.WHITE);
             batch.draw(healthBarEmptyTexture, 10, screenHeight - healthBarHeight - 15, healthBarWidth, healthBarHeight);
+            int currX = 10;
+            for(int i = 0; i < lives; i++)
+            {
+                batch.draw(textureRegion, currX, screenHeight - healthBarHeight - height / 4 - 25, 0, 0, width, height, .25f, .25f, 0f);
+                currX += 5 + width / 4f;
+            }
+            if(currentlyPoweredUp)
+            {
+                batch.draw(rockets[0].getTextureRegion(), 20 + healthBarWidth, screenHeight - healthBarHeight - 15, rockets[0].getWidth() * rockets[0].getHeight() / healthBarHeight, healthBarHeight);
+                font.draw(batch, String.format("x %d", 5 - currentBulletIndex), 25 + healthBarWidth + rockets[0].getWidth() * rockets[0].getHeight() / healthBarHeight, screenHeight - healthBarHeight - 1);
+            }
         }
         else
         {
@@ -248,7 +315,17 @@ public class Tank extends GameObject {
             batch.draw(healthBarFillerTexture, screenWidth - healthBarWidth - 10, screenHeight - healthBarHeight - 15, healthBarWidth * currentHealthPercentage, healthBarHeight);
             batch.setColor(Color.WHITE);
             batch.draw(healthBarEmptyTexture, screenWidth - healthBarWidth - 10, screenHeight - healthBarHeight - 15, healthBarWidth, healthBarHeight);
-
+            int currX = screenWidth - 5 * lives - (width / 4) * lives - 10;
+            for(int i = 0; i < lives; i++)
+            {
+                batch.draw(textureRegion, currX, screenHeight - healthBarHeight - height / 4 - 25, 0, 0, width, height, .25f, .25f, 0f);
+                currX += 5 + width / 4f;
+            }
+            if(currentlyPoweredUp)
+            {
+                batch.draw(rockets[0].getTextureRegion(), screenWidth - healthBarWidth - 20 - (rockets[0].getWidth() * rockets[0].getHeight() / healthBarHeight) * 2, screenHeight - healthBarHeight - 15, rockets[0].getWidth() * rockets[0].getHeight() / healthBarHeight, healthBarHeight);
+                font.draw(batch, String.format("x %d", 5 - currentBulletIndex), screenWidth - healthBarWidth - 15 - (rockets[0].getWidth() * rockets[0].getHeight() / healthBarHeight) * 1, screenHeight - healthBarHeight - 1);
+            }
         }
     }
 }
