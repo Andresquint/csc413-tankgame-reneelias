@@ -1,6 +1,8 @@
 package com.tankgame.game.Drawables;
 
+import com.badlogic.gdx.Audio;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -33,8 +35,9 @@ public class Tank extends GameObject {
     TextureRegion healthBarEmptyTexture, healthBarFillerTexture;
     boolean currentlyPoweredUp;
     BitmapFont font;
+    Sound explosionSound;
 
-    public Tank(Color tint, HashMap<String, TextureRegion> textureMap, Animation<TextureRegion> explosionAnimation, int x, int y, int width, int height, boolean p1, int speed, float rotationSpeed, int fullHealth, int lives)
+    public Tank(Color tint, HashMap<String, TextureRegion> textureMap, Animation<TextureRegion> explosionAnimation, int x, int y, int width, int height, boolean p1, int speed, float rotationSpeed, int fullHealth, int lives, Sound explosionSound)
     {
         super(tint, x, y, width, height);
         this.p1 = p1;
@@ -72,6 +75,7 @@ public class Tank extends GameObject {
         this.lives = lives;
         currentlyPoweredUp = false;
         font = new BitmapFont();
+        this.explosionSound = explosionSound;
     }
 
     public Tank(Color tint, Texture texture, int x, int y, int width, int height, boolean p1, int speed, float rotationSpeed)
@@ -163,10 +167,10 @@ public class Tank extends GameObject {
                 rockets[i].Update(screenWidth, screenHeight, walls, enemy);
             }
         }
-        if(currentlyPoweredUp)
-        {
-            bullets = rockets;
-        }
+//        if(currentlyPoweredUp)
+//        {
+//            bullets = rockets;
+//        }
         if(pressedMap.get("Shoot") && lives > 0 && bulletTimer >= .2f)
         {
             if(currentBulletIndex >= bullets.length)
@@ -191,7 +195,6 @@ public class Tank extends GameObject {
             bulletTimer = 0;
             currentBulletIndex++;
         }
-
     }
 
     private boolean CheckWallCollision(WallPiece[][] walls)
@@ -227,6 +230,7 @@ public class Tank extends GameObject {
             else
             {
                 healthPoints = 0;
+                explosionSound.play();
             }
         }
     }

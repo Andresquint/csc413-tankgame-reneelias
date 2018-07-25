@@ -2,6 +2,9 @@ package com.tankgame.game;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.AudioDevice;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -29,6 +32,8 @@ public class ScreenHandler extends ApplicationAdapter {
 	Animation<TextureRegion> explosion;
 	OrthographicCamera cam1, cam2, miniCam;
 	Powerup rocketPowerup;
+	Music song;
+	Sound explosionSound;
 	
 	@Override
 	public void create () {
@@ -72,10 +77,10 @@ public class ScreenHandler extends ApplicationAdapter {
 		}
 		explosion = GifDecoder.loadGIFAnimation(Animation.PlayMode.NORMAL, Gdx.files.internal("Explosion_large_trans.gif").read());
 		explosion.setFrameDuration(.045f);
-		tank1 = new Tank(Color.WHITE, textureMap, explosion, mapWidth / 4 - 25, mapHeight - 50, 50, 50, true, 10, 5, 20, 3);
-		tank2 = new Tank(Color.WHITE, textureMap, explosion, mapWidth * 3 / 4 - 25, 0, 50, 50, false, 10, 5, 10, 3);
-		rocketPowerup = new Powerup(Color.WHITE, textureMap.get("RocketPickup"), (int)(mapWidth / 2 - (tank1.getWidth() * .85f) / 2), 200, (int)(tank1.getWidth() * .85f), (int)(tank1.getWidth() * .85f));
 
+		tank1 = new Tank(Color.WHITE, textureMap, explosion, mapWidth / 4 - 25, mapHeight - 50, 50, 50, true, 10, 5, 20, 3, Gdx.audio.newSound(Gdx.files.local("Explosion_large.wav")));
+		tank2 = new Tank(Color.WHITE, textureMap, explosion, mapWidth * 3 / 4 - 25, 0, 50, 50, false, 10, 5, 10, 3, Gdx.audio.newSound(Gdx.files.local("Explosion_large.wav")));
+		rocketPowerup = new Powerup(Color.WHITE, textureMap.get("RocketPickup"), (int)(mapWidth / 2 - (tank1.getWidth() * .85f) / 2), 200, (int)(tank1.getWidth() * .85f), (int)(tank1.getWidth() * .85f));
 
 
 		centerDivider = new Drawable(Color.BLACK, textureMap.get("WhitePixel"), screenWidth / 2 - 2, 0, 4, screenHeight);
@@ -87,9 +92,14 @@ public class ScreenHandler extends ApplicationAdapter {
 		miniCam = new OrthographicCamera(mapWidth + 100, mapHeight + 100);
 		miniCam.position.set(mapWidth / 2, mapHeight/ 2, 0);
 
+		song = Gdx.audio.newMusic(Gdx.files.local("Music.mp3"));
+		song.setLooping(false);
+		song.play();
+
 		initialiazeWalls();
 
 		font = new BitmapFont();
+
 	}
 
 	@Override
