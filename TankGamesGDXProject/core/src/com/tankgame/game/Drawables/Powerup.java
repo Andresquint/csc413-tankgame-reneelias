@@ -5,6 +5,9 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
+import java.util.HashMap;
+import java.util.Random;
+
 public class Powerup extends GameObject {
 
     boolean active;
@@ -12,6 +15,16 @@ public class Powerup extends GameObject {
     public void deactivate(){active = false;}
     float timeElapsed;
     float scaleIncrement;
+    Random random;
+    TextureRegion lifePowerupTexture;
+    TextureRegion rocketPowerupTexture;
+    float elapsedMiniTime;
+    boolean toDrawMini;
+    String type;
+    public String getType()
+    {
+        return type;
+    }
 
     public Powerup(Color tint, Texture texture, int x, int y, int width, int height) {
         super(tint, texture, x, y, width, height);
@@ -25,6 +38,19 @@ public class Powerup extends GameObject {
         active = false;
         timeElapsed = 0;
         scaleIncrement = -.0025f;
+    }
+
+    public Powerup(Color tint, HashMap<String, TextureRegion> textureMap, int x, int y, int width, int height) {
+        super(tint, x, y, width, height);
+        active = false;
+        timeElapsed = 0;
+        scaleIncrement = -.0025f;
+        rocketPowerupTexture = textureMap.get("RocketPickup");
+        lifePowerupTexture = textureMap.get("LifePowerup");
+        random = new Random();
+        elapsedMiniTime = 0;
+        toDrawMini = true;
+        type = "Rocket";
     }
 
     public Powerup(Color tint, int x, int y, int width, int height) {
@@ -42,6 +68,25 @@ public class Powerup extends GameObject {
             scaleX = 1;
             scaleY = 1;
             scaleIncrement = -Math.abs(scaleIncrement);
+            if(random.nextInt() % 2 == 0)
+            {
+                textureRegion = rocketPowerupTexture;
+                type = "Rocket";
+            }
+            else
+            {
+                textureRegion = lifePowerupTexture;
+                type = "Life";
+            }
+            if(random.nextInt() % 2 == 0)
+            {
+                y = 200;
+            }
+            else
+            {
+                y = 1200;
+            }
+            elapsedMiniTime += deltaTime;
         }
         else
         {
@@ -60,6 +105,20 @@ public class Powerup extends GameObject {
                 scaleIncrement *= -1;
             }
             super.Draw(batch);
+        }
+    }
+
+    public void MiniDraw(SpriteBatch batch)
+    {
+        if(active)
+        {
+            float oldScaleX = scaleX;
+            float oldScaleY = scaleY;
+            scaleX = 2f;
+            scaleY = 2f;
+            super.Draw(batch);
+            scaleX = oldScaleX;
+            scaleY = oldScaleY;
         }
     }
 }

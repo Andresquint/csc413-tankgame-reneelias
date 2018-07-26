@@ -113,9 +113,20 @@ public class Tank extends GameObject {
 
         if(powerup.getActive() && powerup.getHitbox().overlaps(getHitbox()))
         {
-            bullets = rockets;
-            currentBulletIndex = 0;
-            currentlyPoweredUp = true;
+            if(powerup.getType().equals("Rocket"))
+            {
+                bullets = rockets;
+                currentBulletIndex = 0;
+                currentlyPoweredUp = true;
+            }
+            else
+            {
+                healthPoints += 5;
+                if(healthPoints > fullHealth)
+                {
+                    healthPoints = fullHealth;
+                }
+            }
             powerup.deactivate();
         }
     }

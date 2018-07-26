@@ -2,7 +2,6 @@ package com.tankgame.game;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.audio.AudioDevice;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
@@ -13,10 +12,8 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Vector3;
 import com.tankgame.game.Drawables.*;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -31,7 +28,7 @@ public class ScreenHandler extends ApplicationAdapter {
 	BitmapFont font;
 	Animation<TextureRegion> explosion;
 	OrthographicCamera cam1, cam2, miniCam;
-	Powerup rocketPowerup;
+	Powerup powerup;
 	Music song;
 	Sound explosionSound;
 	
@@ -59,6 +56,7 @@ public class ScreenHandler extends ApplicationAdapter {
 		textureMap.put("HealthBarFiller", new TextureRegion(new Texture("HealthBarFiller.png"), 0, 0, 301, 50));
 		textureMap.put("RocketPickup", new TextureRegion(new Texture("RocketPickup.png"), 0, 0, 32, 32));
 		textureMap.put("Rocket", new TextureRegion(new Texture("Rocket.png"), 0, 0, 21, 12));
+		textureMap.put("LifePowerup", new TextureRegion(new Texture("LifePowerupWhite.png"), 0 ,0, 151, 151));
 		background = new ArrayList<Drawable>();
 		int backgroundX = -320,  backgroundY = -480;
 		while(true)
@@ -80,7 +78,7 @@ public class ScreenHandler extends ApplicationAdapter {
 
 		tank1 = new Tank(Color.WHITE, textureMap, explosion, mapWidth / 4 - 25, mapHeight - 50, 50, 50, true, 10, 5, 20, 3, Gdx.audio.newSound(Gdx.files.local("Explosion_large.wav")));
 		tank2 = new Tank(Color.WHITE, textureMap, explosion, mapWidth * 3 / 4 - 25, 0, 50, 50, false, 10, 5, 10, 3, Gdx.audio.newSound(Gdx.files.local("Explosion_large.wav")));
-		rocketPowerup = new Powerup(Color.WHITE, textureMap.get("RocketPickup"), (int)(mapWidth / 2 - (tank1.getWidth() * .85f) / 2), 200, (int)(tank1.getWidth() * .85f), (int)(tank1.getWidth() * .85f));
+		powerup = new Powerup(Color.WHITE, textureMap, (int)(mapWidth / 2 - (tank1.getWidth() * .85f) / 2), 200, (int)(tank1.getWidth() * .85f), (int)(tank1.getWidth() * .85f));
 
 
 		centerDivider = new Drawable(Color.BLACK, textureMap.get("WhitePixel"), screenWidth / 2 - 2, 0, 4, screenHeight);
@@ -99,14 +97,13 @@ public class ScreenHandler extends ApplicationAdapter {
 		initialiazeWalls();
 
 		font = new BitmapFont();
-
 	}
 
 	@Override
 	public void render () {
-		rocketPowerup.Update(Gdx.graphics.getDeltaTime(), false);
-		tank1.Update(Gdx.input, mapWidth, mapHeight, walls, tank2, Gdx.graphics.getDeltaTime(), rocketPowerup);
-		tank2.Update(Gdx.input, mapWidth, mapHeight, walls, tank1, Gdx.graphics.getDeltaTime(), rocketPowerup);
+		powerup.Update(Gdx.graphics.getDeltaTime(), false);
+		tank1.Update(Gdx.input, mapWidth, mapHeight, walls, tank2, Gdx.graphics.getDeltaTime(), powerup);
+		tank2.Update(Gdx.input, mapWidth, mapHeight, walls, tank1, Gdx.graphics.getDeltaTime(), powerup);
 
 		draw();
 	}
@@ -126,7 +123,7 @@ public class ScreenHandler extends ApplicationAdapter {
 		{
 			back.Draw(cameraBatch);
 		}
-		rocketPowerup.Draw(cameraBatch);
+		powerup.Draw(cameraBatch);
 		tank1.Draw(cameraBatch);
 		tank2.Draw(cameraBatch);
 		for(WallPiece[] wall: walls)
@@ -151,7 +148,7 @@ public class ScreenHandler extends ApplicationAdapter {
 		{
 			back.Draw(cameraBatch);
 		}
-		rocketPowerup.Draw(cameraBatch);
+		powerup.Draw(cameraBatch);
 		tank1.Draw(cameraBatch);
 		tank2.Draw(cameraBatch);
 		for(WallPiece[] wall: walls)
@@ -188,7 +185,7 @@ public class ScreenHandler extends ApplicationAdapter {
 		{
 			back.Draw(miniMapBatch);
 		}
-		rocketPowerup.Draw(miniMapBatch);
+		powerup.MiniDraw(miniMapBatch);
 		tank1.MiniDraw(miniMapBatch);
 		tank2.MiniDraw(miniMapBatch);
 		for(WallPiece[] wall: walls)
