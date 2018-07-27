@@ -1,6 +1,4 @@
 # csc413-TankGame
 
-## Student Name :
-## Student ID :
-
-
+## Student Name : Rene Elias
+## Student ID : 910254129

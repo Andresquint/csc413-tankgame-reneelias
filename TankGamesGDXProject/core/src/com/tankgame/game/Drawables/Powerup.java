@@ -12,7 +12,11 @@ public class Powerup extends GameObject {
 
     boolean active;
     public boolean getActive(){return active;}
-    public void deactivate(){active = false;}
+    public void deactivate()
+    {
+        active = false;
+        timeElapsed = 0;
+    }
     float timeElapsed;
     float scaleIncrement;
     Random random;
@@ -63,7 +67,6 @@ public class Powerup extends GameObject {
     public void Update(float deltaTime, boolean tankUsingPowerup) {
         if(!active && timeElapsed > 5)
         {
-            timeElapsed = 0;
             active = true;
             scaleX = 1;
             scaleY = 1;

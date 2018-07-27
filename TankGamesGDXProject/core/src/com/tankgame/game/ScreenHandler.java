@@ -57,6 +57,7 @@ public class ScreenHandler extends ApplicationAdapter {
 		textureMap.put("RocketPickup", new TextureRegion(new Texture("RocketPickup.png"), 0, 0, 32, 32));
 		textureMap.put("Rocket", new TextureRegion(new Texture("Rocket.png"), 0, 0, 21, 12));
 		textureMap.put("LifePowerup", new TextureRegion(new Texture("LifePowerupWhite.png"), 0 ,0, 151, 151));
+
 		background = new ArrayList<Drawable>();
 		int backgroundX = -320,  backgroundY = -480;
 		while(true)
@@ -76,7 +77,7 @@ public class ScreenHandler extends ApplicationAdapter {
 		explosion = GifDecoder.loadGIFAnimation(Animation.PlayMode.NORMAL, Gdx.files.internal("Explosion_large_trans.gif").read());
 		explosion.setFrameDuration(.045f);
 
-		tank1 = new Tank(Color.WHITE, textureMap, explosion, mapWidth / 4 - 25, mapHeight - 50, 50, 50, true, 10, 5, 20, 3, Gdx.audio.newSound(Gdx.files.local("Explosion_large.wav")));
+		tank1 = new Tank(Color.WHITE, textureMap, explosion, mapWidth / 4 - 25, mapHeight - 50, 50, 50, true, 10, 5, 10, 3, Gdx.audio.newSound(Gdx.files.local("Explosion_large.wav")));
 		tank2 = new Tank(Color.WHITE, textureMap, explosion, mapWidth * 3 / 4 - 25, 0, 50, 50, false, 10, 5, 10, 3, Gdx.audio.newSound(Gdx.files.local("Explosion_large.wav")));
 		powerup = new Powerup(Color.WHITE, textureMap, (int)(mapWidth / 2 - (tank1.getWidth() * .85f) / 2), 200, (int)(tank1.getWidth() * .85f), (int)(tank1.getWidth() * .85f));
 
@@ -91,11 +92,10 @@ public class ScreenHandler extends ApplicationAdapter {
 		miniCam.position.set(mapWidth / 2, mapHeight/ 2, 0);
 
 		song = Gdx.audio.newMusic(Gdx.files.local("Music.mp3"));
-		song.setLooping(false);
-		song.play();
+		song.setLooping(true);
+//		song.play();
 
 		initialiazeWalls();
-
 		font = new BitmapFont();
 	}
 
@@ -201,7 +201,6 @@ public class ScreenHandler extends ApplicationAdapter {
 
 	public void initialiazeWalls()
 	{
-
 		walls = new WallPiece[7][];
 
 		/**Center Divider*/
