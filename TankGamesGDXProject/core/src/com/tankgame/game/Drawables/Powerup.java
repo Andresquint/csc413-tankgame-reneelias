@@ -83,7 +83,7 @@ public class Powerup extends GameObject {
             }
             if(random.nextInt() % 2 == 0)
             {
-                y = 200;
+                y = 100;
             }
             else
             {

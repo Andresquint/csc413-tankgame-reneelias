@@ -10,6 +10,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.tankgame.game.TankControls;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Tank extends GameObject {
@@ -36,9 +38,9 @@ public class Tank extends GameObject {
     TextureRegion healthBarEmptyTexture, healthBarFillerTexture;
     boolean currentlyPoweredUp;
     BitmapFont font;
-    Sound explosionSound;
+    Sound explosionSound, bulletSound;
 
-    public Tank(Color tint, HashMap<String, TextureRegion> textureMap, Animation<TextureRegion> explosionAnimation, int x, int y, int width, int height, boolean p1, int speed, float rotationSpeed, int fullHealth, int lives, Sound explosionSound) {
+    public Tank(Color tint, HashMap<String, TextureRegion> textureMap, Animation<TextureRegion> explosionAnimation, int x, int y, int width, int height, boolean p1, int speed, float rotationSpeed, int fullHealth, int lives, Sound explosionSound, Sound bulletSound) {
         super(tint, x, y, width, height);
         this.p1 = p1;
         if (p1) {
@@ -73,6 +75,7 @@ public class Tank extends GameObject {
         currentlyPoweredUp = false;
         font = new BitmapFont();
         this.explosionSound = explosionSound;
+        this.bulletSound = bulletSound;
     }
 
     public Tank(Color tint, Texture texture, int x, int y, int width, int height, boolean p1, int speed, float rotationSpeed) {
@@ -90,7 +93,7 @@ public class Tank extends GameObject {
         this.rotationSpeed = rotationSpeed;
     }
 
-    public void Update(Input input, int screenWidth, int screenHeight, WallPiece[][] walls, Tank enemy, float deltaTime, Powerup powerup) {
+    public void Update(Input input, int screenWidth, int screenHeight, ArrayList<WallPiece> walls, Tank enemy, float deltaTime, Powerup powerup) {
         HashMap<String, Boolean> pressedMap = tankControls.UpdateInput(input);
         if (healthPoints > 0 && lives > 0) {
             UpdateTankPosition(pressedMap, screenWidth, screenHeight, walls, enemy);
@@ -116,7 +119,7 @@ public class Tank extends GameObject {
         }
     }
 
-    private void UpdateTankPosition(HashMap<String, Boolean> currentInput, int screenWidth, int screenHeight, WallPiece[][] walls, Tank enemy) {
+    private void UpdateTankPosition(HashMap<String, Boolean> currentInput, int screenWidth, int screenHeight, ArrayList<WallPiece> walls, Tank enemy) {
         if (currentInput.get("Left")) {
             rotation += rotationSpeed;
         }
@@ -143,7 +146,7 @@ public class Tank extends GameObject {
         }
     }
 
-    private void ManageBullets(HashMap<String, Boolean> pressedMap, int screenWidth, int screenHeight, WallPiece[][] walls, Tank enemy) {
+    private void ManageBullets(HashMap<String, Boolean> pressedMap, int screenWidth, int screenHeight, ArrayList<WallPiece> walls, Tank enemy) {
         for (int i = 0; i < bullets.length; i++) {
             if (bullets[i].isActive()) {
                 bullets[i].Update(screenWidth, screenHeight, walls, enemy);
@@ -158,13 +161,13 @@ public class Tank extends GameObject {
             if (currentlyPoweredUp) {
                 while (rockets[currentRocketIndex].isActive()) {
                     currentRocketIndex++;
-                    if(currentRocketIndex >= rockets.length)
-                    {
+                    if (currentRocketIndex >= rockets.length) {
                         currentRocketIndex = 0;
                     }
                 }
                 currentlyAddedRockets++;
                 rockets[currentRocketIndex].activate((int) x + width / 2, (int) y + height / 2, rotation);
+                bulletSound.play();
                 bulletTimer = 0;
                 if (currentlyAddedRockets == 5) {
                     currentlyPoweredUp = false;
@@ -177,19 +180,18 @@ public class Tank extends GameObject {
                     }
                 }
                 bullets[currentBulletIndex].activate((int) x + width / 2, (int) y + height / 2, rotation);
+                bulletSound.play();
                 bulletTimer = 0;
             }
 
         }
     }
 
-    private boolean CheckWallCollision(WallPiece[][] walls) {
-        for (WallPiece[] wall : walls) {
-            for (WallPiece w : wall) {
-                if (getHitbox().overlaps(w.getHitbox())) {
-                    if (!w.isDestructable() || (w.isDestructable() && ((DestructableWallPiece) w).getHealth() > 0)) {
-                        return true;
-                    }
+    private boolean CheckWallCollision(ArrayList<WallPiece> walls) {
+        for (WallPiece w : walls) {
+            if (getHitbox().overlaps(w.getHitbox())) {
+                if (!w.isDestructable() || (w.isDestructable() && ((DestructableWallPiece) w).getHealth() > 0)) {
+                    return true;
                 }
             }
         }
