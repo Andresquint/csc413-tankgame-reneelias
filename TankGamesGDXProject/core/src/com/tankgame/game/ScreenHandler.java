@@ -42,8 +42,8 @@ public class ScreenHandler extends ApplicationAdapter {
         screenHeight = 720;
 //		mapWidth = 1900;
 //		mapHeight = 1450;
-        mapWidth = 32 * 50;
-        mapHeight = 27 * 50;
+        mapWidth = 50 * 50;
+        mapHeight = 41 * 50;
         miniMapWidth = mapWidth / 14;
         miniMapHeight = mapHeight / 14;
         Gdx.graphics.setWindowedMode(screenWidth, screenHeight);
@@ -110,7 +110,7 @@ public class ScreenHandler extends ApplicationAdapter {
 
     @Override
     public void render() {
-        powerup.Update(Gdx.graphics.getDeltaTime(), false);
+        powerup.Update(Gdx.graphics.getDeltaTime(), mapWidth, mapHeight);
         tank1.Update(Gdx.input, mapWidth, mapHeight, walls, tank2, Gdx.graphics.getDeltaTime(), powerup);
         tank2.Update(Gdx.input, mapWidth, mapHeight, walls, tank1, Gdx.graphics.getDeltaTime(), powerup);
 
@@ -217,7 +217,7 @@ public class ScreenHandler extends ApplicationAdapter {
     }
 
     public void initialiazeWalls() {
-        level = Gdx.files.local("Level1.txt");
+        level = Gdx.files.local("Level1Large.txt");
         String levelString = level.readString().replace("\n", "").replace("\r", "");
 //		walls = new WallPiece[7][];
         walls = new ArrayList<WallPiece>();

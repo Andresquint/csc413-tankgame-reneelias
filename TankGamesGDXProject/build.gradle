@@ -14,6 +14,10 @@ buildscript {
     }
 }
 
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.0'
+}
+
 allprojects {
     apply plugin: "eclipse"
     apply plugin: "idea"
@@ -56,8 +60,4 @@ project(":core") {
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
         
     }
-}
-
-tasks.eclipse.doLast {
-    delete ".project"
 }

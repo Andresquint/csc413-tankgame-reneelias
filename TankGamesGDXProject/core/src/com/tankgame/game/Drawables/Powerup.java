@@ -64,7 +64,7 @@ public class Powerup extends GameObject {
         scaleIncrement = -.0025f;
     }
 
-    public void Update(float deltaTime, boolean tankUsingPowerup) {
+    public void Update(float deltaTime, int mapWidth, int mapHeight) {
         if(!active && timeElapsed > 5)
         {
             active = true;
@@ -81,14 +81,14 @@ public class Powerup extends GameObject {
                 textureRegion = lifePowerupTexture;
                 type = "Life";
             }
-            if(random.nextInt() % 2 == 0)
-            {
-                y = 100;
-            }
-            else
-            {
-                y = 1200;
-            }
+//            if(random.nextInt() % 2 == 0)
+//            {
+//                y = 100;
+//            }
+//            else
+//            {
+                y = mapHeight / 2 - height / 2;
+//            }
             elapsedMiniTime += deltaTime;
         }
         else
