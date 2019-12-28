@@ -110,7 +110,6 @@ public class ScreenHandler extends ApplicationAdapter {
 
     @Override
     public void render() {
-        powerup.Update(Gdx.graphics.getDeltaTime(), mapWidth, mapHeight);
         tank1.Update(Gdx.input, mapWidth, mapHeight, walls, tank2, Gdx.graphics.getDeltaTime(), powerup);
         tank2.Update(Gdx.input, mapWidth, mapHeight, walls, tank1, Gdx.graphics.getDeltaTime(), powerup);
 

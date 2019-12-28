@@ -167,7 +167,7 @@ public class Tank extends GameObject {
                 }
                 currentlyAddedRockets++;
                 rockets[currentRocketIndex].activate((int) x + width / 2, (int) y + height / 2, rotation);
-                bulletSound.play();
+                bulletSound.play(.25f);
                 bulletTimer = 0;
                 if (currentlyAddedRockets == 5) {
                     currentlyPoweredUp = false;
@@ -180,7 +180,7 @@ public class Tank extends GameObject {
                     }
                 }
                 bullets[currentBulletIndex].activate((int) x + width / 2, (int) y + height / 2, rotation);
-                bulletSound.play();
+                bulletSound.play(.25f);
                 bulletTimer = 0;
             }
 
